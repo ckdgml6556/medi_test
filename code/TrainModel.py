@@ -28,12 +28,12 @@ train_subarachnoid_dir = os.path.join(Const.DATA_TRAIN_PATH, "subarachnoid")
 train_subdural_dir = os.path.join(Const.DATA_TRAIN_PATH, "subdural")
 
 # 옵티마이져
-optimizer = SGD(lr=0.0001)
-# optimizer = Adam(lr=0.0001)
+# optimizer = SGD(lr=0.0001)
+optimizer = Adam(lr=0.0001)
 
 def get_session():
     config = tf.compat.v1.ConfigProto(
-        device_count={'GPU': 0}
+        device_count={'GPU': 1}
     )
     tf.compat.v1.Session(config=config)
 
@@ -76,10 +76,10 @@ def trainningModel(net_type):
     net_model.compile(optimizer=optimizer, loss=losses.categorical_crossentropy, metrics=['accuracy'])
 
     history = net_model.fit_generator(
-        steps_per_epoch=200,
+        steps_per_epoch=400,
         generator=train_generator,
         validation_data=vali_generator,
-        validation_steps=50,
+        validation_steps=100,
         epochs=Const.EPOCH_SIZE,
         callbacks=[checkpoint]
     )
@@ -96,6 +96,6 @@ def trainningModel(net_type):
 # getResNet50Model()
 # getVGG16Model()
 # get_session()
-trainningModel(Const.MODEL_NEW_VGG19)
+#trainningModel(Const.MODEL_NEW_VGG19)
 trainningModel(Const.MODEL_PRE_VGG19)
 # trainningModel(Const.MODEL_NEW_RESNET50)
