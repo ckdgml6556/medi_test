@@ -5,3 +5,4 @@ model/
 *.pdf
 *.png
 *.dcm
+*.pyc

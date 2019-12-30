@@ -11,8 +11,9 @@ DATA_LABEL_CSV = "data\\labeling_data.csv"
 label_dict = ["nomal","epidural","intraparenchymal","intraventricular","subarachnoid","subdural"]
 
 def changFileName():
-    file_list = os.listdir(Const.DATA_ALL_PATH)
-    print(file_list)
+    for file in glob.glob(f"{Const.DATA_ALL_PATH}\\*.dcm"):
+        file_name = file.split("_")[1]
+        os.rename(file, f"{Const.DATA_ALL_PATH}\\{file_name}")
 
 # 전체 폴더에서 분류
 def classficationFile():
@@ -95,6 +96,7 @@ def dicomToJpg():
             mritopng.convert_file(f"{Const.DATA_ALL_PATH}\\{dir}\\{file}", f"{Const.DATA_ALL_PATH}\\{dir}\\{file}.png")
 
 
+changFileName()
 # dicomToJpg()
 # seperateData(0.6, 0.2, 0.2)
 #classficationFile()
