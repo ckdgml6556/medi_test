@@ -44,8 +44,7 @@ def trainningModel(net_type):
         Const.DATA_TRAIN_PATH,
         target_size=(Const.IMAGE_WIDTH_SIZE, Const.IMAGE_HEIGHT_SIZE),
         batch_size=Const.BATCH_SIZE,
-        class_mode="categorical",
-        interpolation='nearest'
+        class_mode="categorical"
     )
 
     vali_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -53,18 +52,12 @@ def trainningModel(net_type):
         Const.DATA_VAL_PATH,
         target_size=(Const.IMAGE_WIDTH_SIZE, Const.IMAGE_HEIGHT_SIZE),
         batch_size=Const.BATCH_SIZE,
-        class_mode="categorical",
-        interpolation='nearest'
+        class_mode="categorical"
     )
 
     model_svae_dir = f"{Const.MODEL_SAVE_PATH}\\{net_type}"
     if not os.path.exists(model_svae_dir):
         os.makedirs(model_svae_dir)
-
-    file_path = f"{model_svae_dir}\\{net_type}"+"-{epoch:02d}-{val_accuracy:.2f}.h5"
-    checkpoint = ModelCheckpoint(file_path, monitor='accuracy', verbose=1, save_best_only=False,
-                                 save_weights_only=False, mode='max',)
-    # early = EarlyStopping(monitor='accuracy', min_delta=0, patience=20, verbose=1, mode='auto')
 
     if net_type in Const.MODEL_PRE_VGG19:
         net_model = VGG19.getVGG19Model()
@@ -74,6 +67,19 @@ def trainningModel(net_type):
         net_model = ResNet50.getNewResNet50()
 
     net_model.compile(optimizer=optimizer, loss=losses.categorical_crossentropy, metrics=['accuracy'])
+
+    model_json_file = f"{model_svae_dir}\\model.json"
+    if not os.path.isfile(model_json_file):
+        model_json = net_model.to_json()
+        with open(model_json_file , "w") as json_file:
+            json_file.write(model_json)
+
+
+    file_path = f"{model_svae_dir}\\{net_type}"+"-{epoch:02d}-{val_accuracy:.2f}.h5"
+    checkpoint = ModelCheckpoint(file_path, monitor='accuracy', verbose=1, save_best_only=False,
+                                 save_weights_only=False, mode='max',)
+    # early = EarlyStopping(monitor='accuracy', min_delta=0, patience=20, verbose=1, mode='auto')
+
 
     history = net_model.fit_generator(
         steps_per_epoch=400,
@@ -96,6 +102,6 @@ def trainningModel(net_type):
 # getResNet50Model()
 # getVGG16Model()
 # get_session()
-#trainningModel(Const.MODEL_NEW_VGG19)
+trainningModel(Const.MODEL_NEW_VGG19)
 trainningModel(Const.MODEL_PRE_VGG19)
-# trainningModel(Const.MODEL_NEW_RESNET50)
+trainningModel(Const.MODEL_NEW_RESNET50)
