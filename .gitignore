@@ -1,0 +1,7 @@
+.idea/
+data/
+model/
+*.pptx
+*.pdf
+*.png
+*.dcm
