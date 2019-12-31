@@ -4,17 +4,24 @@ import shutil
 import mritopng
 import glob
 import Const
+import re
 import pandas as pd
 
 label_dict = ["nomal", "epidural", "intraparenchymal", "intraventricular", "subarachnoid", "subdural"]
+def renameFlie():
+    file_list = glob.glob(f"{Const.DATA_ALL_PATH}\\*.dcm")
+    for file in file_list:
+        new_file = file.split("\\").pop()[3:]
+        print(new_file)
+        os.rename(file, f"{Const.DATA_ALL_PATH}\\{new_file}")
 
 
 # 전체 폴더에서 분류
 def classficationFile():
     rdf = csv.reader(open(Const.DATA_LABEL_CSV, 'r', encoding='utf-8'))
     for line in rdf:
-        file_name = f"{line[0]}.dcm"
-        if os.path.isfile(f"{Const.DATA_ALL_PATH}\\data\\{file_name}"):
+        file_name = f"ID_{line[0]}.dcm"
+        if os.path.isfile(f"{Const.DATA_ALL_PATH}\\{file_name}"):
             dir_path = f"{Const.DATA_ALL_PATH}\\{line[1]}"
             if not os.path.exists(dir_path):
                 os.makedirs(dir_path)
@@ -59,17 +66,17 @@ def seperateData(train_ratio, val_ratio, test_ratio):
         test_list = file_list[train_count + val_count:]
 
         for train_file in train_list:
-            train_file = train_file.split("\\")[3]
+            train_file = train_file.split("\\").pop()
             if not os.path.isfile(f"{train_path}\\{train_file}"):
                 shutil.copy(f"{all_path}\\{train_file}", f"{train_path}\\{train_file}")
 
         for val_file in val_list:
-            val_file = val_file.split("\\")[3]
+            val_file = val_file.split("\\").pop()
             if not os.path.isfile(f"{val_path}\\{val_file}"):
                 shutil.copy(f"{all_path}\\{val_file}", f"{val_path}\\{val_file}")
 
         for test_file in test_list:
-            test_file = test_file.split("\\")[3]
+            test_file = test_file.split("\\").pop()
             if not os.path.isfile(f"{test_path}\\{test_file}"):
                 shutil.copy(f"{all_path}\\{test_file}", f"{test_path}\\{test_file}")
 
@@ -97,7 +104,9 @@ def deleteDCMFiles():
             print(f"remove file {file}")
 
 
-deleteDCMFiles()
+# renameFlie()
+# deleteDCMFiles()
 # dicomToJpg()
 # seperateData(0.6, 0.2, 0.2)
 # classficationFile()
+dicomToJpg()

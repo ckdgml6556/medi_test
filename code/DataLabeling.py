@@ -4,10 +4,10 @@ import csv
 import pandas as pd
 import Const
 
-XML_READ_FILE_PATH = "data\ori_data.xlsx"
-CSV_ALL_DATA = "data\stage_2_train.csv"
-CSV_WRITE_FILE_PATH = "data\labeling_data.csv"
-DATA_FILE_PATH = "data\\train\\"
+XML_READ_FILE_PATH = f"{Const.MAIN_PATH}data\\ori_data.xlsx"
+CSV_ALL_DATA = f"{Const.MAIN_PATH}data\\sort_all_data.csv"
+CSV_WRITE_FILE_PATH = f"{Const.MAIN_PATH}data\\labeling_data.csv"
+DATA_FILE_PATH = f"{Const.MAIN_PATH}data\\train\\"
 #
 # XML_READ_FILE_PATH = "data\stage_2_train.csv"
 # XML_WRITE_FILE_PATH = "data\labeling_data_all.xlsx"
@@ -61,7 +61,7 @@ label_list = []
 # Label CSV파일 기준으로 있는 데이터만 새로저장
 def restoreData():
     csv_data = pd.read_csv(CSV_ALL_DATA, header=None)
-    last_data_id = re.compile("_\w+.").search(os.listdir(Const.DATA_ALL_PATH).pop()).group()[1:11]
+    # last_data_id = re.compile("_\w+.").search(os.listdir(Const.DATA_ALL_PATH).pop()).group()[1:11]
 
     label = ""
     index = 0
@@ -69,20 +69,22 @@ def restoreData():
         while True:
             item_index = 1 + (6 * index)
             id = csv_data[0][item_index].split("_")[1]
-            if os.path.isfile(f"{Const.DATA_ALL_PATH}ID_{id}.dcm"):
-                print(f"Find File {id}")
+            if id:
+            # if os.path.isfile(f"{Const.DATA_ALL_PATH}ID_{id}.dcm"):
+                print(f"ID is {id}")
                 any = csv_data[1][item_index]
                 print(any)
-                if any == "0":
+                if any == "0" or any == 0:
                     label = "nomal"
                     print(f"id = {id} label = {label}")
                 else:
+                    print("bleading")
                     # 어디선가 출혈 부위가 있는 경우 찾기
                     for i in range(1, 6):
                         bleeder_index = 1 + (6 * index) + i
                         part = csv_data[0][bleeder_index].split("_")[2]
                         value = csv_data[1][bleeder_index]
-                        if value == "1":
+                        if value == "1" or value == 1:
                             label = part
                             print(f"Bleeder id = {id} label = {label}")
                             break
@@ -92,15 +94,17 @@ def restoreData():
                 else:
                     id_list.append(id)
                     label_list.append(label)
+            else :
+                break;
 
-            if last_data_id == id:
-                print("FIND LAST ID")
-                break
+            # if last_data_id == id:
+            #     print("FIND LAST ID")
             index += 1
+
     except Exception as e:
         print(e)
 
-def saveXlsx():
+def saveCSV():
     if os.path.isfile(CSV_WRITE_FILE_PATH):
         os.remove(CSV_WRITE_FILE_PATH)
     label_df = pd.DataFrame({'id': id_list, 'label': label_list})
@@ -120,6 +124,6 @@ def allDataCSVSorting():
 
 #allDataCSVSorting()
 restoreData()
-saveXlsx()
+saveCSV()
 # getClassificationLabel()
 # saveXlsx()
