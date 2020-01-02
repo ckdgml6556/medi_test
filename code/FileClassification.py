@@ -56,15 +56,20 @@ def seperateData(train_ratio, val_ratio, test_ratio):
 
         file_list = glob.glob(f"{all_path}\\*")
         file_list = [file for file in file_list if file.endswith(".png")]
+        # 전체 데이터 쓰기
         file_count = len(file_list)
         print(file_count)
+        # 정해진 데이터 쓰기
+        # max_count = 3000
+        # file_count = max_count if len(file_list) > max_count else len(file_list)
         train_count = int(round(file_count * train_ratio))
         val_count = int(round(file_count * val_ratio))
 
+        print(train_count)
+        print(val_count)
         train_list = file_list[0:train_count]
         val_list = file_list[train_count:train_count + val_count]
-        test_list = file_list[train_count + val_count:]
-
+        test_list = file_list[train_count + val_count:file_count]
         for train_file in train_list:
             train_file = train_file.split("\\").pop()
             if not os.path.isfile(f"{train_path}\\{train_file}"):
@@ -103,10 +108,20 @@ def deleteDCMFiles():
             os.remove(file)
             print(f"remove file {file}")
 
+def changeDCM():
+    dir_list = os.listdir(f"{Const.DATA_ALL_PATH}\\")
+    print(dir_list)
+    for dir in dir_list:
+        file_list = os.listdir(f"{Const.DATA_ALL_PATH}\\{dir}")
+        for file in file_list:
+            new_file = file.split(".dcm")[0]
+            os.rename(f"{Const.DATA_ALL_PATH}\\{dir}\\{file}", f"{Const.DATA_ALL_PATH}\\{dir}\\{new_file}.png")
+
 
 # renameFlie()
 # deleteDCMFiles()
 # dicomToJpg()
-# seperateData(0.6, 0.2, 0.2)
+seperateData(Const.TRAIN_BIAS, Const.VAL_BIAS, Const.TEST_BIAS)
+# changeDCM()
 # classficationFile()
-dicomToJpg()
+# dicomToJpg()

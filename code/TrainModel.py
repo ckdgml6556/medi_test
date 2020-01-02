@@ -31,6 +31,8 @@ train_subdural_dir = os.path.join(Const.DATA_TRAIN_PATH, "subdural")
 # optimizer = SGD(lr=0.0001)
 optimizer = Adam(lr=0.0001)
 
+
+
 def get_session():
     config = tf.compat.v1.ConfigProto(
         device_count={'GPU': 1}
@@ -80,12 +82,11 @@ def trainningModel(net_type):
                                  save_weights_only=False, mode='max',)
     # early = EarlyStopping(monitor='accuracy', min_delta=0, patience=20, verbose=1, mode='auto')
 
-
     history = net_model.fit_generator(
-        steps_per_epoch=400,
+        steps_per_epoch=len(train_generator.filenames)/Const.BATCH_SIZE,
         generator=train_generator,
         validation_data=vali_generator,
-        validation_steps=100,
+        validation_steps=len(vali_generator.filenames)/Const.BATCH_SIZE,
         epochs=Const.EPOCH_SIZE,
         callbacks=[checkpoint]
     )
@@ -102,6 +103,6 @@ def trainningModel(net_type):
 # getResNet50Model()
 # getVGG16Model()
 # get_session()
-trainningModel(Const.MODEL_NEW_VGG19)
+# trainningModel(Const.MODEL_NEW_VGG19)
 trainningModel(Const.MODEL_PRE_VGG19)
-trainningModel(Const.MODEL_NEW_RESNET50)
+# trainningModel(Const.MODEL_NEW_RESNET50)
