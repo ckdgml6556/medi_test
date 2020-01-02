@@ -4,8 +4,16 @@ import shutil
 import mritopng
 import glob
 import Const
+import pydicom as dicom
+import cv2
+import numpy as np
+import png
+import PIL
 import re
 import pandas as pd
+
+#PNG파일 Option
+PNG = False
 
 label_dict = ["nomal", "epidural", "intraparenchymal", "intraventricular", "subarachnoid", "subdural"]
 def renameFlie():
@@ -90,15 +98,30 @@ def seperateData(train_ratio, val_ratio, test_ratio):
     # data_label = data_frame[1][1:].to_list()
 
 
-# dicom파일을 png로바꾸기 라이브러리 다운 https://github.com/danishm/mritopng
-def dicomToJpg():
-    dir_list = os.listdir(f"{Const.DATA_ALL_PATH}\\")
-    print(dir_list)
-    for dir in dir_list:
-        file_list = os.listdir(f"{Const.DATA_ALL_PATH}\\{dir}")
-        for file in file_list:
-            mritopng.convert_file(f"{Const.DATA_ALL_PATH}\\{dir}\\{file}", f"{Const.DATA_ALL_PATH}\\{dir}\\{file}.png")
 
+# def dicomToJpg():
+#     dir_list = os.listdir(f"{Const.DATA_ALL_PATH}\\")
+#     print(dir_list)
+#     for dir in dir_list:
+#         file_list = os.listdir(f"{Const.DATA_ALL_PATH}\\{dir}")
+#         for file in file_list:
+#             mritopng.convert_file(f"{Const.DATA_ALL_PATH}\\{dir}\\{file}", f"{Const.DATA_ALL_PATH}\\{dir}\\{file}.png")
+
+
+def dicomToJpg():
+    path = "D:\\data\\"
+    file = "ID_0c6ee8b7a.dcm"
+    ds = dicom.dcmread(f"{path}{file}")
+    img = ds.pixel_array
+    scaled_img = cv2.convertScaleAbs(img, alpha=(255.0 / 80))
+    # cv2.imshow('sample image dicom',ds.pixel_array)
+    #print(ds)
+    # pixel_array_numpy = ds.pixel_array
+    if not PNG:
+        image = file.replace('.dcm', '.jpg')
+    else:
+        image = file.replace('.dcm', '.png')
+    cv2.imwrite(os.path.join(path, image), scaled_img)
 
 def deleteDCMFiles():
     dir_list = glob.glob(f"{Const.DATA_ALL_PATH}\\*")
@@ -120,8 +143,8 @@ def changeDCM():
 
 # renameFlie()
 # deleteDCMFiles()
-# dicomToJpg()
-seperateData(Const.TRAIN_BIAS, Const.VAL_BIAS, Const.TEST_BIAS)
+dicomToJpg()
+# seperateData(Const.TRAIN_BIAS, Const.VAL_BIAS, Const.TEST_BIAS)
 # changeDCM()
 # classficationFile()
 # dicomToJpg()
