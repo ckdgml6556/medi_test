@@ -99,29 +99,67 @@ def seperateData(train_ratio, val_ratio, test_ratio):
 
 
 
-# def dicomToJpg():
-#     dir_list = os.listdir(f"{Const.DATA_ALL_PATH}\\")
-#     print(dir_list)
-#     for dir in dir_list:
-#         file_list = os.listdir(f"{Const.DATA_ALL_PATH}\\{dir}")
-#         for file in file_list:
-#             mritopng.convert_file(f"{Const.DATA_ALL_PATH}\\{dir}\\{file}", f"{Const.DATA_ALL_PATH}\\{dir}\\{file}.png")
-
-
 def dicomToJpg():
-    path = "D:\\data\\"
-    file = "ID_0c6ee8b7a.dcm"
-    ds = dicom.dcmread(f"{path}{file}")
-    img = ds.pixel_array
-    scaled_img = cv2.convertScaleAbs(img, alpha=(255.0 / 80))
-    # cv2.imshow('sample image dicom',ds.pixel_array)
-    #print(ds)
-    # pixel_array_numpy = ds.pixel_array
-    if not PNG:
-        image = file.replace('.dcm', '.jpg')
-    else:
-        image = file.replace('.dcm', '.png')
-    cv2.imwrite(os.path.join(path, image), scaled_img)
+    dir_list = os.listdir(f"{Const.DATA_ALL_PATH}\\")
+    print(dir_list)
+    for dir in dir_list:
+        file_list = os.listdir(f"{Const.DATA_ALL_PATH}\\{dir}")
+        for file in file_list:
+            ds = dicom.dcmread(f"{Const.DATA_ALL_PATH}\\{dir}\\{file}")
+            print(ds)
+            # print(type(ds.WindowCenter))
+            # if str(type(ds.WindowCenter)) == "<class 'pydicom.multival.MultiValue'>":
+            #     wc = float(ds.WindowCenter[0])
+            #     ww =  float(ds.WindowWidth[0])
+            # else :
+            #     wc = ds.WindowCenter
+            #     ww = ds.WindowWidth
+            # img = ds.pixel_array
+            # arr = img * ds.RescaleSlope + ds.RescaleIntercept
+            # # min = int(wc) - (int(ww) * 2)
+            # # max = int(wc) + (int(ww) / 2)
+            # # arr[arr < min] = min
+            # # arr[arr > max] = max
+            # scaled_img = cv2.convertScaleAbs(arr, beta= (255.0 / ww))
+            # # # cv2.imshow('sample image dicom',ds.pixel_array)
+            # # # print(ds)
+            # # # pixel_array_numpy = ds.pixel_array
+            # if not PNG:
+            #     image = file.replace('.dcm', '.jpg')
+            # else:
+            #     image = file.replace('.dcm', '.png')
+            # cv2.imwrite(os.path.join(f"{Const.DATA_ALL_PATH}\\{dir}", image), scaled_img)
+
+
+def moveJPG():
+    dir_list = os.listdir(Const.DATA_JPG_PATH)
+    for dir in dir_list:
+        class_dir_path = os.path.join(Const.DATA_JPG_PATH, dir)
+        sub_dir_list = os.listdir(class_dir_path)
+        index = 1
+        for sub_dir in sub_dir_list:
+            sub_dir_path = os.path.join(class_dir_path, sub_dir)
+            file_list = os.listdir(sub_dir_path)
+            for file in file_list:
+                file = os.path.join(sub_dir_path,file)
+                shutil.move(file, f"{class_dir_path}\\{index}.jpg")
+                index += 1
+            os.rmdir(sub_dir_path)
+#
+# def dicomToJpg():
+#     path = "D:\\data\\"
+#     file = "ID_0c6ee8b7a.dcm"
+#     ds = dicom.dcmread(f"{path}{file}")
+#     img = ds.pixel_array
+#     scaled_img = cv2.convertScaleAbs(img, alpha=(255.0 / 80))
+#     # cv2.imshow('sample image dicom',ds.pixel_array)
+#     #print(ds)
+#     # pixel_array_numpy = ds.pixel_array
+#     if not PNG:
+#         image = file.replace('.dcm', '.jpg')
+#     else:
+#         image = file.replace('.dcm', '.png')
+#     cv2.imwrite(os.path.join(path, image), scaled_img)
 
 def deleteDCMFiles():
     dir_list = glob.glob(f"{Const.DATA_ALL_PATH}\\*")
@@ -143,7 +181,9 @@ def changeDCM():
 
 # renameFlie()
 # deleteDCMFiles()
-dicomToJpg()
+# dicomToJpg()
+moveJPG()
+# deleteDCMFiles()
 # seperateData(Const.TRAIN_BIAS, Const.VAL_BIAS, Const.TEST_BIAS)
 # changeDCM()
 # classficationFile()
