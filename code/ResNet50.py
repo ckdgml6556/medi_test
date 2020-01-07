@@ -6,7 +6,6 @@ from keras.layers import BatchNormalization, Conv2D, Activation, Dense, GlobalAv
 import Const
 
 # number of classes
-K = 6
 
 image_width_size = 128
 image_height_size = 128
@@ -205,7 +204,7 @@ def getNewResNet50():
     x = conv5_layer(x)
 
     x = GlobalAveragePooling2D()(x)
-    output_tensor = Dense(K, activation='softmax')(x)
+    output_tensor = Dense(Const.CLASS_COUNT, activation='softmax')(x)
 
     resnet50_net = Model(input_tensor, output_tensor)
     return resnet50_net

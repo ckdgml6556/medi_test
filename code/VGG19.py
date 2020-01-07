@@ -26,7 +26,7 @@ def getVGG19Model():
     x = Dense(units=4096, activation="relu")(x)
     x = Dense(units=4096, activation="relu")(x)
     x = Dropout(0.5)(x)
-    x = Dense(units=6, activation="softmax")(x)
+    x = Dense(units=Const.CLASS_COUNT, activation="softmax")(x)
 
     # Creating new model. Please note that this is NOT a Sequential() model.
     custom_model = Model(inputs=pre_model.input, output=x)
@@ -70,7 +70,7 @@ def getNewVGG19Model():
     model.add(Flatten())
     model.add(Dense(units=4096, activation="relu"))
     model.add(Dense(units=4096, activation="relu"))
-    model.add(Dense(units=6, activation="softmax"))
+    model.add(Dense(units=Const.CLASS_COUNT, activation="softmax"))
 
     return model
 

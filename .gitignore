@@ -1,8 +1,11 @@
 .idea/
 data/
 model/
+*.h5
 *.pptx
 *.pdf
 *.png
 *.dcm
 *.pyc
+*.jpg
+*.json

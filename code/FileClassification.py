@@ -5,7 +5,6 @@ import mritopng
 import glob
 import Const
 import pydicom as dicom
-import cv2
 import numpy as np
 import png
 import PIL
@@ -42,11 +41,17 @@ def classficationFile():
 # 일정 비율 만큼 전체데이터에서 트레인과 테스트 셋 파일 복사
 def seperateData(train_ratio, val_ratio, test_ratio):
     for label in label_dict:
-        print(label)
         all_path = f"{Const.DATA_ALL_PATH}\\{label}"
-        train_path = f"{Const.DATA_TRAIN_PATH}\\{label}"
-        val_path = f"{Const.DATA_VAL_PATH}\\{label}"
-        test_path = f"{Const.DATA_TEST_PATH}\\{label}"
+        print(label)
+        if Const.CURRENT_TYPE == Const.TYPE_NOMAL:
+            new_label = label if label =="nomal" else "abnomal"
+            train_path = f"{Const.DATA_TRAIN_PATH}\\{new_label}"
+            val_path = f"{Const.DATA_VAL_PATH}\\{new_label}"
+            test_path = f"{Const.DATA_TEST_PATH}\\{new_label}"
+        else:
+            train_path = f"{Const.DATA_TRAIN_PATH}\\{label}"
+            val_path = f"{Const.DATA_VAL_PATH}\\{label}"
+            test_path = f"{Const.DATA_TEST_PATH}\\{label}"
 
         print(all_path)
 
@@ -63,13 +68,14 @@ def seperateData(train_ratio, val_ratio, test_ratio):
             print(f"make dir {test_path}")
 
         file_list = glob.glob(f"{all_path}\\*")
-        file_list = [file for file in file_list if file.endswith(".png")]
+        file_format = ".png" if PNG else ".jpg"
+        file_list = [file for file in file_list if file.endswith(file_format)]
         # 전체 데이터 쓰기
-        file_count = len(file_list)
-        print(file_count)
-        # 정해진 데이터 쓰기
-        # max_count = 3000
-        # file_count = max_count if len(file_list) > max_count else len(file_list)
+        # file_count = len(file_list)
+        # print(file_count)
+        #정해진 데이터 쓰기
+        max_count = 20000
+        file_count = max_count if len(file_list) > max_count else len(file_list)
         train_count = int(round(file_count * train_ratio))
         val_count = int(round(file_count * val_ratio))
 
@@ -81,17 +87,17 @@ def seperateData(train_ratio, val_ratio, test_ratio):
         for train_file in train_list:
             train_file = train_file.split("\\").pop()
             if not os.path.isfile(f"{train_path}\\{train_file}"):
-                shutil.copy(f"{all_path}\\{train_file}", f"{train_path}\\{train_file}")
+                shutil.copy(f"{all_path}\\{train_file}", f"{train_path}\\{label}_{train_file}")
 
         for val_file in val_list:
             val_file = val_file.split("\\").pop()
             if not os.path.isfile(f"{val_path}\\{val_file}"):
-                shutil.copy(f"{all_path}\\{val_file}", f"{val_path}\\{val_file}")
+                shutil.copy(f"{all_path}\\{val_file}", f"{val_path}\\{label}_{val_file}")
 
         for test_file in test_list:
             test_file = test_file.split("\\").pop()
             if not os.path.isfile(f"{test_path}\\{test_file}"):
-                shutil.copy(f"{all_path}\\{test_file}", f"{test_path}\\{test_file}")
+                shutil.copy(f"{all_path}\\{test_file}", f"{test_path}\\{label}_{test_file}")
 
     # data_frame = pd.read_csv(DATA_LABEL_CSV, header=None)
     # data_id = data_frame[0][1:].to_list()
@@ -132,9 +138,9 @@ def dicomToJpg():
 
 
 def moveJPG():
-    dir_list = os.listdir(Const.DATA_JPG_PATH)
+    dir_list = os.listdir(Const.DATA_ALL_PATH)
     for dir in dir_list:
-        class_dir_path = os.path.join(Const.DATA_JPG_PATH, dir)
+        class_dir_path = os.path.join(Const.DATA_ALL_PATH, dir)
         sub_dir_list = os.listdir(class_dir_path)
         index = 1
         for sub_dir in sub_dir_list:
@@ -182,9 +188,9 @@ def changeDCM():
 # renameFlie()
 # deleteDCMFiles()
 # dicomToJpg()
-moveJPG()
+# moveJPG()
 # deleteDCMFiles()
-# seperateData(Const.TRAIN_BIAS, Const.VAL_BIAS, Const.TEST_BIAS)
+seperateData(Const.TRAIN_BIAS, Const.VAL_BIAS, Const.TEST_BIAS)
 # changeDCM()
 # classficationFile()
 # dicomToJpg()

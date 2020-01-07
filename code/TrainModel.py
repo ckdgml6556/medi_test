@@ -78,9 +78,9 @@ def trainningModel(net_type):
 
 
     file_path = f"{model_svae_dir}\\{net_type}"+"-{epoch:02d}-{val_accuracy:.2f}.h5"
-    checkpoint = ModelCheckpoint(file_path, monitor='accuracy', verbose=1, save_best_only=False,
+    checkpoint = ModelCheckpoint(file_path, monitor='val_accuracy', verbose=1, save_best_only=True,
                                  save_weights_only=False, mode='max',)
-    # early = EarlyStopping(monitor='accuracy', min_delta=0, patience=20, verbose=1, mode='auto')
+    early = EarlyStopping(monitor='accuracy', min_delta=0, patience=200, verbose=1, mode='auto')
 
     history = net_model.fit_generator(
         steps_per_epoch=len(train_generator.filenames)/Const.BATCH_SIZE,
@@ -88,7 +88,7 @@ def trainningModel(net_type):
         validation_data=vali_generator,
         validation_steps=len(vali_generator.filenames)/Const.BATCH_SIZE,
         epochs=Const.EPOCH_SIZE,
-        callbacks=[checkpoint]
+        callbacks=[checkpoint, early]
     )
     plt.plot(history.history["accuracy"])
     plt.plot(history.history['val_accuracy'])
@@ -104,5 +104,5 @@ def trainningModel(net_type):
 # getVGG16Model()
 # get_session()
 # trainningModel(Const.MODEL_NEW_VGG19)
-trainningModel(Const.MODEL_PRE_VGG19)
-# trainningModel(Const.MODEL_NEW_RESNET50)
+# trainningModel(Const.MODEL_PRE_VGG19)
+trainningModel(Const.MODEL_NEW_RESNET50)
