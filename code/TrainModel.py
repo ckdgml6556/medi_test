@@ -11,6 +11,9 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 import matplotlib.pyplot as plt
 import ResNet50,VGG19
 import Const
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import f1_score
 
 
 # os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
@@ -39,6 +42,34 @@ def get_session():
     )
     tf.compat.v1.Session(config=config)
 
+# def precision(y_target, y_pred):
+#     # clip(t, clip_value_min, clip_value_max) : clip_value_min~clip_value_max 이외 가장자리를 깎아 낸다
+#     # round : 반올림한다
+#     y_pred_yn = K.round(K.clip(y_pred, 0, 1))  # 예측값을 0(Negative) 또는 1(Positive)로 설정한다
+#     y_target_yn = K.round(K.clip(y_target, 0, 1))  # 실제값을 0(Negative) 또는 1(Positive)로 설정한다
+#
+#     # True Positive는 실제 값과 예측 값이 모두 1(Positive)인 경우이다
+#     count_true_positive = K.sum(y_target_yn * y_pred_yn)
+#
+#     # (True Positive + False Positive) = 예측 값이 1(Positive) 전체
+#     count_true_positive_false_positive = K.sum(y_pred_yn)
+#
+#     # Precision = (True Positive) / (True Positive + False Positive)
+#     # K.epsilon()는 'divide by zero error' 예방차원에서 작은 수를 더한다
+#     precision = count_true_positive / (count_true_positive_false_positive + K.epsilon())
+#
+#     # return a single tensor value
+#     return precision
+#
+#
+# def f1score(y_target, y_pred):
+#     _recall = recall(y_target, y_pred)
+#     _precision = precision(y_target, y_pred)
+#     # K.epsilon()는 'divide by zero error' 예방차원에서 작은 수를 더한다
+#     _f1score = (2 * _recall * _precision) / (_recall + _precision + K.epsilon())
+#
+#     # return a single tensor value
+#     return _f1score
 
 def trainningModel(net_type):
     train_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -68,7 +99,9 @@ def trainningModel(net_type):
     elif net_type in Const.MODEL_NEW_RESNET50:
         net_model = ResNet50.getNewResNet50()
 
-    net_model.compile(optimizer=optimizer, loss=losses.categorical_crossentropy, metrics=['accuracy'])
+    net_model.compile(optimizer=optimizer,
+                      loss=losses.categorical_crossentropy,
+                      metrics = ["accuracy", precision_score, recall_score, f1_score])
 
     model_json_file = f"{model_svae_dir}\\model.json"
     if not os.path.isfile(model_json_file):
@@ -91,6 +124,9 @@ def trainningModel(net_type):
         callbacks=[checkpoint, early]
     )
     plt.plot(history.history["accuracy"])
+    plt.plot(history.history["precision_score"])
+    plt.plot(history.history["recall_score"])
+    plt.plot(history.history["f1_score"])
     plt.plot(history.history['val_accuracy'])
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
