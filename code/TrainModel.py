@@ -122,7 +122,7 @@ def trainningModel(net_type):
 
     net_model.compile(optimizer=optimizer,
                       loss=losses.categorical_crossentropy,
-                      metrics = ["accuracy", precision_score, recall_score, f1_score])
+                      metrics = ["accuracy", precision, recall, f1score])
 
     model_json_file = f"{model_svae_dir}\\model.json"
     if not os.path.isfile(model_json_file):
@@ -145,16 +145,16 @@ def trainningModel(net_type):
         callbacks=[checkpoint, early]
     )
     plt.plot(history.history["accuracy"])
-    plt.plot(history.history["precision_score"])
-    plt.plot(history.history["recall_score"])
-    plt.plot(history.history["f1_score"])
+    plt.plot(history.history["precision"])
+    plt.plot(history.history["recall"])
+    plt.plot(history.history["f1score"])
     plt.plot(history.history['val_accuracy'])
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
     plt.title("model accuracy")
     plt.ylabel("Accuracy")
     plt.xlabel("Epoch")
-    plt.legend(["Accuracy", "Validation Accuracy", "loss", "Validation Loss"])
+    plt.legend(["Accuracy", "Precision", "Recall", "F1", "Validation Accuracy", "loss", "Validation Loss"])
     plt.show()
 
 # getResNet50Model()
