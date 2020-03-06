@@ -3,11 +3,13 @@ import re
 import csv
 import pandas as pd
 import Const
+import pydicom as dicom
+import glob
 
-XML_READ_FILE_PATH = f"{Const.MAIN_PATH}data\\ori_data.xlsx"
-CSV_ALL_DATA = f"{Const.MAIN_PATH}data\\sort_all_data.csv"
-CSV_WRITE_FILE_PATH = f"{Const.MAIN_PATH}data\\labeling_data.csv"
-DATA_FILE_PATH = f"{Const.MAIN_PATH}data\\train\\"
+XML_READ_FILE_PATH = os.path.join(Const.MAIN_PATH, Const.DATA_PATH,"ori_data.xlsx")
+CSV_ALL_DATA = os.path.join(Const.MAIN_PATH, Const.DATA_PATH, "sort_all_data.csv")
+CSV_WRITE_FILE_PATH = os.path.join(Const.MAIN_PATH, Const.DATA_PATH,"labeling_data.csv")
+DATA_FILE_PATH = os.path.join(Const.MAIN_PATH, Const.DATA_PATH,"train")
 #
 # XML_READ_FILE_PATH = "data\stage_2_train.csv"
 # XML_WRITE_FILE_PATH = "data\labeling_data_all.xlsx"
@@ -57,7 +59,6 @@ label_list = []
 #             label_list.append(label)
 #         index += 1
 
-
 # Label CSV파일 기준으로 있는 데이터만 새로저장
 def restoreData():
     csv_data = pd.read_csv(CSV_ALL_DATA, header=None)
@@ -104,6 +105,7 @@ def restoreData():
     except Exception as e:
         print(e)
 
+# CSV파일로 정보를 내보내느 메소드
 def saveCSV():
     if os.path.isfile(CSV_WRITE_FILE_PATH):
         os.remove(CSV_WRITE_FILE_PATH)
@@ -122,8 +124,74 @@ def allDataCSVSorting():
     print(all_data)
     all_data.to_csv(CSV_ALL_DATA,index=False)
 
+# DCM 정보를 확인하는 메소드
+def confirmDCMInfo():
+    data_path = os.path.join(Const.DATA_ALL_PATH)
+    file_list = os.listdir(data_path)
+    for file in file_list:
+        dcm = dicom.dcmread(os.path.join(data_path, file))
+        print(dcm.ImagePositionPatient)
+
+# DCM파일과 기본 LabelCSV파일의 정보를 묶어 다시 CSV로 내보내는 메소드
+def convertDCMInfoCSV():
+    all_data = pd.read_csv(CSV_ALL_DATA, header=None, low_memory=False)
+    index = 0
+    id_index = 1
+    id_list
+    any_list = []
+    epidural_list = []
+    intraparenchymal_list = []
+    intraventricular_list = []
+    subarachnoid_list = []
+    subdural_list = []
+    SOPInstantUID_list = []
+    PatientID_list = []
+    ImagePosision_list = []
+    while True:
+        try:
+            dcm_id = ("_").join(str(all_data[0][id_index]).split("_")[:2])
+            print(dcm_id)
+            dcm = dicom.dcmread(os.path.join(Const.MAIN_PATH,Const.DATA_PATH,"stage_2_train",f"{dcm_id}.dcm"))
+            id_list.append(dcm_id)
+            any_list.append(all_data[1][id_index])
+            epidural_list.append(all_data[1][id_index+1])
+            intraparenchymal_list.append(all_data[1][id_index+2])
+            intraventricular_list.append(all_data[1][id_index+3])
+            subarachnoid_list.append(all_data[1][id_index+4])
+            subdural_list.append(all_data[1][id_index+5])
+            SOPInstantUID_list.append(dcm.SOPInstanceUID)
+            print(dcm.SOPInstanceUID)
+            PatientID_list.append(dcm.PatientID)
+            print(dcm.PatientID)
+            ImagePosision_list.append(dcm.ImagePositionPatient[2])
+            print(dcm.ImagePositionPatient[2])
+        except KeyError:
+            break
+        except Exception as e:
+            print(e)
+        index += 1
+        id_index += 6
+    label_df = pd.DataFrame({
+        'ID': id_list,
+        'any': any_list,
+        'epidural': epidural_list,
+        'intraparenchymal': intraparenchymal_list,
+        'intraventricular': intraventricular_list,
+        'subarachnoid': subarachnoid_list,
+        'subdural': subdural_list,
+        'SOPInstantUID': SOPInstantUID_list,
+        'PatientID': PatientID_list,
+        'ImagePosision': ImagePosision_list
+    })
+    label_df.to_csv(
+        os.path.join(Const.MAIN_PATH,Const.DATA_PATH, "data_patient.csv"),
+        index=False
+    )
+
+# confirmDCMInfo()
+convertDCMInfoCSV()
 #allDataCSVSorting()
-restoreData()
-saveCSV()
+# restoreData()
+# saveCSV()
 # getClassificationLabel()
 # saveXlsx()

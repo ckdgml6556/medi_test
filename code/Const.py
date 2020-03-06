@@ -10,8 +10,8 @@ TYPE_ABNOMAL = 5
 CURRENT_TYPE = TYPE_ALL
 CLASS_COUNT = CURRENT_TYPE
 
-IMAGE_WIDTH_SIZE = 128
-IMAGE_HEIGHT_SIZE = 128
+IMAGE_WIDTH_SIZE = 256
+IMAGE_HEIGHT_SIZE = 256
 IMAGE_DEPTH = 3
 
 TRAIN_BIAS = 0.6
@@ -26,6 +26,7 @@ MODEL_PRE_VGG19 = "MODEL_PRE_VGG19"
 MODEL_NEW_VGG19 = "MODEL_NEW_VGG19"
 MODEL_PRE_RESNET50 = "MOEL_PRE_RESNET50"
 MODEL_NEW_RESNET50 = "MOEL_NEW_RESNET50"
+MODEL_PRE_RESNEXT101 = "MODEL_PRE_RESNEXT101"
 
 if CURRENT_TYPE == TYPE_ALL:
     DATA_PATH = "data"
@@ -34,9 +35,12 @@ elif CURRENT_TYPE == TYPE_NOMAL:
 else:
     DATA_PATH = "data_abnomal"
 
-ABS_PATH = os.path.abspath("medi_project").split("\\")
-MAIN_PATH = "\\".join(ABS_PATH[0:len(ABS_PATH) - 2])
+ABS_PATH = os.path.abspath("").split("\\")
+MAIN_PATH = "\\".join(ABS_PATH[0:len(ABS_PATH) - 1])
 DATA_ALL_PATH = os.path.join(MAIN_PATH, DATA_PATH, "all")
+DATA_PATIENT_PATH = os.path.join(MAIN_PATH, "data_patient")
+DATA_ALL_JPG_PATH = os.path.join(MAIN_PATH, DATA_PATH, "all_jpg")
+# DATA_ALL_PATH = "D:\\data\\test"
 DATA_TRAIN_PATH = os.path.join(MAIN_PATH, DATA_PATH, "train")
 DATA_VAL_PATH = os.path.join(MAIN_PATH, DATA_PATH, "val")
 DATA_TEST_PATH = os.path.join(MAIN_PATH, DATA_PATH, "test")

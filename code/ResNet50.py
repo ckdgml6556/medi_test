@@ -1,15 +1,15 @@
 from keras.applications import ResNet50
-from keras import Input
-from keras.models import Model, load_model
-from keras.layers import BatchNormalization, Conv2D, Activation, Dense, GlobalAveragePooling2D, MaxPooling2D, \
+from keras import Input, layers, regularizers
+from keras.models import Model, load_model, Sequential
+from keras.layers import BatchNormalization, Dropout, Flatten, Conv2D, Activation, Dense, GlobalAveragePooling2D, MaxPooling2D, \
     ZeroPadding2D, Add
 import Const
+import numpy as np
 
 # number of classes
 
-image_width_size = 128
-image_height_size = 128
-input_tensor = Input(shape=(Const.IMAGE_WIDTH_SIZE, Const.IMAGE_HEIGHT_SIZE, Const.IMAGE_DEPTH), dtype='float32', name='input')
+input_tensor = Input(shape=(Const.IMAGE_WIDTH_SIZE, Const.IMAGE_HEIGHT_SIZE, Const.IMAGE_DEPTH), dtype='float32',
+                     name='input')
 
 
 def conv1_layer(x):
@@ -209,7 +209,42 @@ def getNewResNet50():
     resnet50_net = Model(input_tensor, output_tensor)
     return resnet50_net
 
-def getPreResNet50():
-    pre_net = ResNet50(
 
+def getPreResNet50(isFreezeFromLinear=False):
+    pre_net = ResNet50(
+        weights='imagenet',
+        include_top=False,
+        input_shape=(Const.IMAGE_WIDTH_SIZE, Const.IMAGE_HEIGHT_SIZE, Const.IMAGE_DEPTH)
     )
+
+    # x = pre_net.output
+    # # output_tensor = Dense(Const.CLASS_COUNT, activation='softmax')(x)
+    # resnet50_net = Model(pre_net.input, pre_net.output)
+    if isFreezeFromLinear:
+        # x = pre_net.output
+        # output_tensor = Dense(Const.CLASS_COUNT, activation='softmax')(x)
+        # resnet50_net = Model(pre_net.input, pre_net.output)
+        # freeze from activation_30 convnet_set layers
+        for layers in pre_net.layers[:108]:
+            layers.trainable = False
+        for i, layer in enumerate(pre_net.layers):
+            print(i, layer.name, layer.trainable)
+    # else:
+        # x = pre_net.output
+        # output_tensor = Dense(Const.CLASS_COUNT, activation='softmax')(x)
+        # resnet50_net = Model(pre_net.input, pre_net.output)
+
+    pre_net.summary()
+    model = Sequential()
+    model.add(pre_net)
+    model.add(GlobalAveragePooling2D())
+    model.add(Dense(Const.CLASS_COUNT, activation='softmax'))
+    # model.add(Flatten())
+    # # model.add(Dropout(0.5))
+    # model.add(Dense(64, activation='relu', kernel_regularizer=regularizers.l2(0.001)))
+    # model.add(Dropout(0.5))
+    # model.add(Dense(Const.CLASS_COUNT, activation='softmax'))
+    # output_tensor = Dense(Const.CLASS_COUNT, activation='softmax')(model.output)
+    # x = GlobalAveragePooling2D()(output_tensor)
+    # new_resnet50_model = Model(pre_net.input, x)
+    return model

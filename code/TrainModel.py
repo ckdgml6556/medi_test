@@ -9,7 +9,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import losses
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 import matplotlib.pyplot as plt
-import ResNet50,VGG19
+import ResNet50,VGG19,ResNext
 import Const
 from sklearn.metrics import recall_score
 from sklearn.metrics import precision_score
@@ -19,7 +19,7 @@ from sklearn.metrics import f1_score
 # os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 # os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
-file_list = os.listdir(Const.DATA_TRAIN_PATH)
+# file_list = os.listdir(Const.DATA_TRAIN_PATH)
 
 label_dict = ["nomal", "epidural", "intraparenchymal", "intraventricular", "subarachnoid", "subdural"]
 
@@ -82,7 +82,7 @@ def precision(y_target, y_pred):
     # return a single tensor value
     return precision
 
-
+# f1Score를 연산하는 메소드
 def f1score(y_target, y_pred):
     _recall = recall(y_target, y_pred)
     _precision = precision(y_target, y_pred)
@@ -92,6 +92,8 @@ def f1score(y_target, y_pred):
     # return a single tensor value
     return _f1score
 
+# netType을 넣어 훈련하는 메소드
+# netType 및 훈련 파라미터의 조정은 Const에 적용되어 있음
 def trainningModel(net_type):
     train_datagen = ImageDataGenerator(rescale=1. / 255)
     train_generator = train_datagen.flow_from_directory(
@@ -119,10 +121,14 @@ def trainningModel(net_type):
         net_model = VGG19.getNewVGG19Model()
     elif net_type in Const.MODEL_NEW_RESNET50:
         net_model = ResNet50.getNewResNet50()
-
+    elif net_type in Const.MODEL_PRE_RESNET50:
+        net_model = ResNet50.getPreResNet50(isFreezeFromLinear=False)
+    elif net_type in Const.MODEL_PRE_RESNEXT101:
+        net_model = ResNext.getPreResNeXt()
     net_model.compile(optimizer=optimizer,
-                      loss=losses.categorical_crossentropy,
-                      metrics = ["accuracy", precision, recall, f1score])
+                          loss=losses.categorical_crossentropy,
+                          metrics=["accuracy", precision, recall, f1score])
+    net_model.summary()
 
     model_json_file = f"{model_svae_dir}\\model.json"
     if not os.path.isfile(model_json_file):
@@ -131,10 +137,10 @@ def trainningModel(net_type):
             json_file.write(model_json)
 
 
-    file_path = f"{model_svae_dir}\\{net_type}"+"-{epoch:02d}-{val_accuracy:.2f}.h5"
+    file_path = os.path.join(model_svae_dir, net_type+ "_{epoch:02d}_{val_accuracy:.2f}.h5")
     checkpoint = ModelCheckpoint(file_path, monitor='val_accuracy', verbose=1, save_best_only=True,
                                  save_weights_only=False, mode='max',)
-    early = EarlyStopping(monitor='accuracy', min_delta=0, patience=200, verbose=1, mode='auto')
+    early = EarlyStopping(monitor='val_accuracy', min_delta=0, patience=200, verbose=1, mode='auto')
 
     history = net_model.fit_generator(
         steps_per_epoch=len(train_generator.filenames)/Const.BATCH_SIZE,
@@ -162,4 +168,4 @@ def trainningModel(net_type):
 # get_session()
 # trainningModel(Const.MODEL_NEW_VGG19)
 # trainningModel(Const.MODEL_PRE_VGG19)
-trainningModel(Const.MODEL_NEW_RESNET50)
+trainningModel(Const.MODEL_PRE_RESNEXT101)
